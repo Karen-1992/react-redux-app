@@ -26,14 +26,14 @@ const taskSlice = createSlice({
                 el.id !== action.payload.id
             );
         },
-        taskRequested(state) {
+        loadTaskRequested(state) {
             state.isLoading = true;
         },
-        taskRequestFailed(state, action) {
+        taskRequestFailed(state) {
             state.isLoading = false;
         },
-        taskCreated(state, action) {
-            state.entities = [...state.entities, action.payload];
+        taskAdded(state, action) {
+            state.entities.push(action.payload);
         },
     }
 });
@@ -43,13 +43,14 @@ const {
     update,
     remove,
     received,
-    taskRequested,
+    loadTaskRequested,
     taskRequestFailed,
-    taskCreated
+    taskAdded
 } = actions;
+const taskRequested = createAction("task/taskRequested");
 
 export const loadTasks = () => async (dispatch) => {
-    dispatch(taskRequested());
+    dispatch(loadTaskRequested());
     try {
         const data = await todosService.fetch();
         dispatch(received(data));
@@ -58,15 +59,17 @@ export const loadTasks = () => async (dispatch) => {
         dispatch(setError(error.message));
     }
 }
-export const createTask = (dat) => async (dispatch) => {
+export const createTask = (task) => async (dispatch) => {
+    dispatch(taskRequested());
     try {
-        const data = await todosService.create(dat);
-        dispatch(taskCreated(data));
+        const data = await todosService.create(task);
+        dispatch(taskAdded(data));
     } catch (error) {
+        dispatch(taskRequestFailed(error.message));
         dispatch(setError(error.message));
     }
 }
-export const completeTask = (id) => (dispatch, getState) => {
+export const completeTask = (id) => (dispatch) => {
     dispatch(update({
         id,
         completed: true
@@ -80,9 +83,6 @@ export function titleChanged(id) {
 }
 export function taskDeleted(id) {
     return remove({ id });
-}
-export function taskCreat() {
-    return taskCreated();
 }
 
 export const getTasks = () => (state) => state.tasks.entities;

@@ -29,8 +29,9 @@ const App = () => {
     const deleteTask = (taskId) => {
         dispatch(taskDeleted(taskId));
     };
-    const createNewTask = () => {
+    const addNewTask = () => {
         dispatch(createTask({
+            userId: 1,
             title: "some title",
             completed: "false"
         }))
@@ -44,7 +45,7 @@ const App = () => {
     return (
         <>
             <h1>App</h1>
-            <button onClick={() => createNewTask()}>Create task</button>
+            <button onClick={() => addNewTask()}>Add task</button>
             <ul>
                 {state.map(el => (
                     <li key={el.id}>
